@@ -1,4 +1,8 @@
 module Child where
     
-child :: [Int] -> Int
-child (posx, posy) = 
+import Auxiliar
+
+-- initial choord, 
+moveChild :: [Choord]
+
+move
