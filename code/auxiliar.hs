@@ -37,17 +37,60 @@ concatChoordList :: Choord -> [Choord] -> [Choord]
 concatChoordList x [] = x : []
 concatChoordList x (x1:xs) = x1 : concatChoordList x xs
 
-hola = print("hola")
+lookForFather :: Choord -> [[Choord]] -> [Choord]
+lookForFather _ [] = [(-1, -1), (-1, -1)] -- break
+lookForFather ch (x:xr) | ch == (x!!0) = x
+                        | otherwise = lookForFather ch xr
+
+lookBack :: Choord -> [Choord] -> [[Choord]] -> Choord
+lookBack destiny current elems | (current!!1) == destiny = current!!0
+                               | otherwise = lookBack destiny (lookForFather (current!!1) elems) elems
+
+tupleToList (x, y) = concatList y (concatList x [])
+
+generateUniList _ 0 = []
+generateUniList x n = do{
+                    let ant = n - 1
+                    ;x : generateUniList x ant
+                }
+
+relationChildParent x y = concatList y (concatList x [])
+
+asosiateParent :: [Choord] -> Choord -> [[Choord]]
+asosiateParent [] _ = []
+asosiateParent (x: xr) ch = (relationChildParent x ch) : asosiateParent xr ch
+
+
+-- testing area
+-- hola = print("hola")
+-- lista :: [[Choord]]
+-- lista = [[(2, 0), (1, 0)], [(1, 0), (0, 0)], [(0, 0), (0, 0)], [(3, 0),(2, 0)], [(3, 1), (3, 0)]]
+
 
 -- bfs :: Choord -> [[Choord]] -> [Choord] -> [Choord] -> Choord
 -- bfs _ [] _ _ = (-1,-1)
 -- bfs pos queue seen elements = do {
---                                     let current = (queue!!0)!!0
---                                     ;if current `elem` elements
---                                         then current
---                                         else (-1,-1)
---                                     ;let temp_fatherchild = concatChoordList current (concatChoordList pos [])
---                                     ;let temp_queue = concatList temp_fatherchild (tail queue)
---                                     ;let temp_seen = concatList current seen
---                                     ;bfs current temp_queue temp_seen elements
---                                 }
+--                     let current = (queue!!0)!!0
+--                     if current `elem` elements
+--                         then current
+--                         else {let temp_fatherchild = concatChoordList current (concatChoordList pos [])
+--                             let temp_queue = concatList temp_fatherchild (tail queue)
+--                             let temp_seen = concatList current seen
+--                             bfs current temp_queue temp_seen elements
+--                     }
+--                 }
+
+
+bfs :: Choord -> [[Choord]] -> [[Choord]] -> [Choord] -> Choord
+bfs _ [] _ _ = (-1,-1)
+bfs pos seen queue elements | pos `elem` elements = pos
+                            | otherwise = do {
+                                let queue_tail = tail queue
+                                ;let queue_head = head queue
+                                ;let h = findNeighbors pos
+                                ;let neighb = notInList h elements
+                                ;let temp_queue = queue_tail++(asosiateParent neighb pos)
+                                ;let temp_pos = (head temp_queue)!!0
+                                ;let temp_seen = concatList queue_head seen
+                                ;bfs temp_pos temp_seen temp_queue elements
+                            }
