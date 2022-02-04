@@ -48,7 +48,7 @@ notInList (x:xr) list = if x `notElem` list
 -- returns a list with the surrounding positions               
 findNeighbors (x, y) = concatList (moveWest x y) (concatList (moveNorth x y) (concatList (moveEast x y) (concatList (moveSouth x y) [])))  
 
--- validates that the provided position does not leave the board
+-- validates that the provided positions does not leave the board
 validPos :: [Coord] -> Int -> Int -> [Coord]
 validPos [] _ _ = []
 validPos (ch : xr) n m  | inRange ch n m = ch : validPos xr n m
