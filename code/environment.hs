@@ -1,6 +1,6 @@
 module Environment where
 
-import Auxiliaradd
+import Auxiliar
 import Child
 import Robot
 
