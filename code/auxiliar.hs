@@ -6,6 +6,8 @@ import System.Random
 -- type that defines the coordinates on the board
 type Coord = (Int, Int)
 
+type BabyPpen = (Coord, Bool)
+
 -- random
 getRandom :: Int -> Int -> Int 
 getRandom min max = unsafePerformIO (getStdRandom (randomR (min, max)))
@@ -25,9 +27,9 @@ inRange (x, y) totalx totaly = x >= 0 && y >=0 && x < totalx && y < totaly
 
 -- surrounding positions
 moveNorth x y = (x-1, y)
-moveEast x y = (x, y+1)
-moveSouth x y= (x+1, y)
-moveWest x y = (x, y-1)
+moveEast x y  = (x, y+1)
+moveSouth x y = (x+1, y)
+moveWest x y  = (x, y-1)
 
 -- surrounding moves with respect to an integer 
 moveDirection :: Coord -> Int -> Coord
@@ -44,7 +46,7 @@ notInList (x:xr) list = if x `notElem` list
                             else notInList xr list
 
 -- returns a list with the surrounding positions               
-findNeighbors (x, y) = concatList (moveSouth x y) (concatList (moveNorth x y) (concatList (moveEast x y) (concatList (moveSouth x y) [])))  
+findNeighbors (x, y) = concatList (moveWest x y) (concatList (moveNorth x y) (concatList (moveEast x y) (concatList (moveSouth x y) [])))  
 
 -- validates that the provided position does not leave the board
 validPos :: [Coord] -> Int -> Int -> [Coord]
@@ -56,6 +58,10 @@ validPos (ch : xr) n m  | inRange ch n m = ch : validPos xr n m
 -- concatenates an element to a list of elements of the same type
 concatList x [] = x : []
 concatList x (x1:xs) = x1 : concatList x xs
+
+-- get surrounding position list
+getGrid :: Coord -> [Coord]
+getGrid (x, y) = [(x-1, y-1), (x-1, y), (x-1, y+1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1)]
 
 
 -- look for the father in the relationship tree
@@ -88,6 +94,13 @@ getInitials :: [[Coord]] -> [Coord]
 getInitials [] = []
 getInitials (x:xr) = x!!0 : getInitials xr 
 
+-- get a new list from another without an x element
+__listWithoutElem__ _ list [] = list
+__listWithoutElem__ i list (x:xr) = if i == x
+                                    then list ++ xr
+                                    else __listWithoutElem__ i (concatList x list) xr
+listWithoutElem i list = __listWithoutElem__ i [] list
+
 -- ###########
 -- ### BFS ###
 -- ###########
@@ -111,11 +124,43 @@ bfs init pos seen queue elements n m  | pos `elem` elements =  concatList pos (c
                                                 elements
                                                 n m
 
-seen::[[Coord]]
-seen = []
-queue:: [[Coord]]
-queue = [[(0, 1), (0, 1)]]
-init::Coord 
-init = (queue!!0)!!0
-elements :: [Coord]
-elements=[(2, 0), (1, 2)]
+getListToPrint :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [String]
+getListToPrint current [] robots dirt child objects babypen robotbaby | elem current robots  = ["_r_"]  
+                                                                    | elem current dirt      = ["_d_"] 
+                                                                    | elem current child     = ["_C_"] 
+                                                                    | elem current objects   = ["_m_"] 
+                                                                    | elem current babypen   = ["_v_"] 
+                                                                    | elem current robotbaby = ["_R_"] 
+                                                                    | otherwise              = ["_._"] 
+getListToPrint current (x:xr) robots dirt child objects babypen robotbaby | elem current robots = "_r_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | elem current dirt      = "_d_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | elem current child     = "_C_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | elem current objects   = "_m_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | elem current babypen   = "_v_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | elem current robotbaby = "_R_" : getListToPrint x xr robots dirt child objects babypen robotbaby
+                                                                       | otherwise              = "_._" : getListToPrint x xr robots dirt child objects babypen robotbaby
+-- current x, current y, total x, total y
+getBoxes :: Int -> Int -> Int -> Int -> [Coord]
+getBoxes x y totalx totaly  | (x /= totalx && y /= totaly) = (x, y) : getBoxes x (y+1) totalx totaly
+                            |  y == totaly = getBoxes (x + 1) 0 totalx totaly
+                            |  x == totalx = [] 
+                            |  otherwise = []
+
+-- the rows of elements with respect to the m columns 
+createListWordFromString :: [String] -> Int -> [String]
+createListWordFromString [] _ = []
+createListWordFromString list n = (unwords (take n list)) : createListWordFromString (drop n list) n
+
+-- receives a list of strings and prints them
+myPrinter :: [String] -> IO ()
+myPrinter [] = putStr ""
+myPrinter (x:xr) = do 
+                    putStrLn x
+                    myPrinter xr
+
+-- print the board
+    -- robots dirt child objects babypen robotbaby n m
+printBoard :: [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> IO ()
+printBoard robots dirt child objects babypen robotbaby n m = myPrinter (createListWordFromString (tail (getListToPrint (0,0) (getBoxes 0 0 n m) robots dirt child objects babypen robotbaby)) m)
+
+list = tail (getListToPrint (0,0) (getBoxes 0 0 3 3) [(0, 1)] [] [(1,0),(2,2)] [(1, 2)] [] [])

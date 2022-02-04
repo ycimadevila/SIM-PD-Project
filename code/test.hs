@@ -16,3 +16,6 @@ all_ = [(1, 2), (2, 3)]
 r = dropWhile (== (1, 2)) all_
 r1 = 3/=2
 r2 = 3==2
+
+ress :: Int -> (Int, Int,Int)
+ress x = (1, 2,3)

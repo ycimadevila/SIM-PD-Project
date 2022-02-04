@@ -1,6 +1,6 @@
 module Environment where
 
-import Auxiliar
+import Auxiliaradd
 import Child
 import Robot
 
@@ -19,6 +19,8 @@ objects = []
 dirt :: [Coord]
 dirt = []
 
-babypen :: [Coord]
+
+-- (babypen coord, if it's being used)
+babypen :: [BabyPpen]
 babypen = []
 
