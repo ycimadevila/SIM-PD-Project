@@ -170,3 +170,12 @@ createBabyPPen :: Int -> Int -> Coord -> [Coord]
 createBabyPPen _ 0 _ = []
 createBabyPPen dir i (x, y) | dir == 0 = (x, y) : createBabyPPen dir (i-1) (moveEast x y) --horizontal
                             | otherwise = (x, y) : createBabyPPen dir (i-1) (moveSouth x y)
+
+showTupleRobot :: Int -> (Coord, [Coord], [Coord], [Coord], [Coord], [Coord], [Coord]) -> [Coord]
+showTupleRobot i (c1,c2,c3,c4, c5, c6, c7) | i == 1 = [c1]
+                                            | i == 2 = c2
+                                            | i == 3 = c3
+                                            | i == 4 = c4
+                                            | i == 5 = c5
+                                            | i == 6 = c6
+                                            | i == 7 = c7
