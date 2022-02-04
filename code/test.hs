@@ -18,4 +18,5 @@ r1 = 3/=2
 r2 = 3==2
 
 ress :: Int -> (Int, Int,Int)
-ress x = (1, 2,3)
+ress x = ((x+1),
+            x, (if x > 0 then 1 else -1))

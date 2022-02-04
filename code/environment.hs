@@ -19,8 +19,11 @@ objects = []
 dirt :: [Coord]
 dirt = []
 
+robotsWithChild :: [Coord]
+robotsWithChild = []
 
--- (babypen coord, if it's being used)
-babypen :: [BabyPpen]
+babypenempty :: [Coord]
 babypen = []
 
+babypenused :: [Coord]
+babypen = []

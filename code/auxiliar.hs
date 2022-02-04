@@ -114,14 +114,15 @@ listWithoutElem i list = __listWithoutElem__ i [] list
         -- temp_seen@(concatList queue_head seen)
     -- ### RETURN ###
         -- bfs temp_pos temp_seen temp_queue elements
-bfs :: Coord -> Coord -> [[Coord]] -> [[Coord]] -> [Coord] -> Int -> Int-> [Coord]
-bfs _ _ _ [] _ _ _ = [(-1,-1), (-1, -1)]
-bfs init pos seen queue elements n m  | pos `elem` elements =  concatList pos (concatList (lookBack init (head queue) seen) []) 
+bfs :: Coord -> Coord -> [[Coord]] -> [[Coord]] -> [Coord] -> [Coord] -> Int -> Int-> [Coord]
+bfs _ _ _ [] _ _ _ _ = [(-1,-1), (-1, -1)]
+bfs init pos seen queue elements notemty n m  | pos `elem` elements =  concatList pos (concatList (lookBack init (head queue) seen) []) 
                             | otherwise = bfs init 
-                                                ((head ((tail queue)++(asosiateParent (notInList (validPos (findNeighbors pos) n m) (getInitials seen)) pos)))!!0) 
-                                                (concatList (head queue) seen) --
-                                                ((tail queue)++(asosiateParent (notInList (validPos (findNeighbors pos) n m) (getInitials seen)) pos)) 
+                                                ((head ((tail queue)++(asosiateParent (notInList (notInList (validPos (findNeighbors pos) n m) (getInitials seen)) notemty) pos)))!!0) 
+                                                ((head queue): seen) --
+                                                ((tail queue)++(asosiateParent (notInList (notInList (validPos (findNeighbors pos) n m) (getInitials seen)) notemty) pos)) 
                                                 elements
+                                                notemty
                                                 n m
 
 getListToPrint :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [String]
@@ -164,3 +165,8 @@ printBoard :: [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> 
 printBoard robots dirt child objects babypen robotbaby n m = myPrinter (createListWordFromString (tail (getListToPrint (0,0) (getBoxes 0 0 n m) robots dirt child objects babypen robotbaby)) m)
 
 list = tail (getListToPrint (0,0) (getBoxes 0 0 3 3) [(0, 1)] [] [(1,0),(2,2)] [(1, 2)] [] [])
+
+createBabyPPen :: Int -> Int -> Coord -> [Coord]
+createBabyPPen _ 0 _ = []
+createBabyPPen dir i (x, y) | dir == 0 = (x, y) : createBabyPPen dir (i-1) (moveEast x y) --horizontal
+                            | otherwise = (x, y) : createBabyPPen dir (i-1) (moveSouth x y)
