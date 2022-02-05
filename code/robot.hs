@@ -7,17 +7,19 @@ import Auxiliar
 moveRobot :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord]  -> [Coord] -> Int -> Int -> (Coord, [Coord], [Coord], [Coord], [Coord], [Coord], [Coord])
 moveRobot ch childs dirt objects babypen babypenused robots robchi n m = if (ch `elem` dirt) && (ch `notElem` robchi) -- if its dirty and not carry a child
                                                                 then (
-                                                                    if (getRandom 1 2 == 1) -- 1 to clean, 2 to move
+                                                                    if ((getRandom 1 2) == 1) -- 1 to clean, 2 to move
                                                                         then (ch, robots, robchi, childs, (listWithoutElem ch dirt), babypen, babypenused)
                                                                         else ( -- it moves if it can
                                                                             let next = (bfs ch ch [] [[ch, ch]] childs (objects++babypenused) n m)!!0
-                                                                            in (if next == (-1,-1) then (ch, robots, robchi, childs, dirt, babypen, babypenused)
-                                                                                else (next,
-                                                                                [next],
-                                                                                (if elem next robchi then (next:robchi) else robchi),
-                                                                                childs,
-                                                                                dirt,
-                                                                                babypen, babypenused
+                                                                            in (if next == (-1,-1)
+                                                                                then (ch, robots, robchi, childs, dirt, babypen, babypenused)
+                                                                                else (
+                                                                                    next,
+                                                                                    [next],
+                                                                                    (if elem next robchi then (next:robchi) else robchi),
+                                                                                    childs,
+                                                                                    dirt,
+                                                                                    babypen, babypenused
                                                                                 )
                                                                             )
                                                                             
@@ -65,9 +67,11 @@ moveRobot ch childs dirt objects babypen babypenused robots robchi n m = if (ch 
                                                                                             dirt, babypen, babypenused
                                                                                             )
                                                                                         )  
-                                                                                )
+                                                                                    )
                                                                         )
                                                                     )
+
+----- testing ----- 
 childs::[Coord]
 childs = [(1, 2), (2, 1)] 
 dirt::[Coord]
@@ -79,9 +83,9 @@ babypen = [(0, 0), (0, 1)]
 babypenused::[Coord]
 babypenused = [] 
 robots::[Coord]
-robots = [(1, 2)] 
+robots = [(2, 2)] 
 ch::Coord 
-ch = (1, 2)
+ch = (2, 2)
 robchi::[Coord]
 robchi = [] 
 n::Int

@@ -15,12 +15,25 @@ getRandom min max = unsafePerformIO (getStdRandom (randomR (min, max)))
 -- coordinate sum
 sumPos (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
 
--- approximation to integers
-toInt :: Float -> Int
-toInt x = round x
 
 -- calculates the percentage of a number x with respect to a total y
-percent perc total = perc * total / 100
+-- percent_ :: Int -> Int -> Int 
+-- percent_ perc total = a
+--     where
+--         b = ci $ fi perc * total
+--         a = ci $ fi a / 100
+--         fi = fromIntegral
+--         ci = ceiling
+-- -- percent_ perc total = round ((perc * total) `div` 100)
+
+
+-- time :: Int -> (Int, Int, Int)
+-- time x = (a,b,c)
+--   where a = ci $ fi x / fi 3600
+--         b = ci $ fi (x `mod` 3600) / fi 60
+--         c = (x `mod` 3600) `mod` 60
+--         fi = fromIntegral
+--         ci = ceiling
 
 -- returns if a position does not go off the board
 inRange (x, y) totalx totaly = x >= 0 && y >=0 && x < totalx && y < totaly
@@ -125,21 +138,25 @@ bfs init pos seen queue elements notemty n m  | pos `elem` elements =  concatLis
                                                 notemty
                                                 n m
 
-getListToPrint :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [String]
-getListToPrint current [] robots dirt child objects babypen robotbaby | elem current robots  = ["_r_"]  
-                                                                    | elem current dirt      = ["_d_"] 
-                                                                    | elem current child     = ["_C_"] 
-                                                                    | elem current objects   = ["_m_"] 
-                                                                    | elem current babypen   = ["_v_"] 
-                                                                    | elem current robotbaby = ["_R_"] 
-                                                                    | otherwise              = ["_._"] 
-getListToPrint current (x:xr) robots dirt child objects babypen robotbaby | elem current robots = "_r_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | elem current dirt      = "_d_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | elem current child     = "_C_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | elem current objects   = "_m_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | elem current babypen   = "_v_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | elem current robotbaby = "_R_" : getListToPrint x xr robots dirt child objects babypen robotbaby
-                                                                       | otherwise              = "_._" : getListToPrint x xr robots dirt child objects babypen robotbaby
+getListToPrint :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [String]
+getListToPrint current [] robots dirt child objects babypen babypenused robotbaby  
+                            | elem current robotbaby   = ["_R_"]  
+                            | elem current robots      = ["_r_"] 
+                            | elem current dirt        = ["_d_"] 
+                            | elem current child       = ["_C_"] 
+                            | elem current objects     = ["_m_"]
+                            | elem current babypenused = ["_X_"] 
+                            | elem current babypen     = ["_v_"]
+                            | otherwise                = ["_._"] 
+getListToPrint current (x:xr) robots dirt child objects babypen babypenused robotbaby 
+                            | elem current robotbaby    = "_R_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current robots       = "_r_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current dirt         = "_d_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current child        = "_C_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current objects      = "_m_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current babypenused  = "_X_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | elem current babypen      = "_v_" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
+                            | otherwise                 = "_._" : getListToPrint x xr robots dirt child objects babypen babypenused robotbaby
 -- current x, current y, total x, total y
 getBoxes :: Int -> Int -> Int -> Int -> [Coord]
 getBoxes x y totalx totaly  | (x /= totalx && y /= totaly) = (x, y) : getBoxes x (y+1) totalx totaly
@@ -161,21 +178,29 @@ myPrinter (x:xr) = do
 
 -- print the board
     -- robots dirt child objects babypen robotbaby n m
-printBoard :: [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> IO ()
-printBoard robots dirt child objects babypen robotbaby n m = myPrinter (createListWordFromString (tail (getListToPrint (0,0) (getBoxes 0 0 n m) robots dirt child objects babypen robotbaby)) m)
+printBoard :: [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> IO ()
+printBoard robots dirt child objects babypen babypenused robotbaby n m = myPrinter (createListWordFromString (tail (getListToPrint (0,0) (getBoxes 0 0 n m) robots dirt child objects babypen babypenused robotbaby)) m)
 
-list = tail (getListToPrint (0,0) (getBoxes 0 0 3 3) [(0, 1)] [] [(1,0),(2,2)] [(1, 2)] [] [])
+-- list = tail (getListToPrint (0,0) (getBoxes 0 0 3 3) [(0, 1)] [] [(1,0),(2,2)] [(1, 2)] [] [])
 
-createBabyPPen :: Int -> Int -> Coord -> [Coord]
-createBabyPPen _ 0 _ = []
-createBabyPPen dir i (x, y) | dir == 0 = (x, y) : createBabyPPen dir (i-1) (moveEast x y) --horizontal
-                            | otherwise = (x, y) : createBabyPPen dir (i-1) (moveSouth x y)
+createBabyPPen :: Int -> Int -> Int -> Int  -> Coord -> [Coord]
+createBabyPPen dir i n m (x, y) 
+                            | i == 0 || not (inRange (x, y) n m) = []
+                            | dir == 0 = (x, y) : createBabyPPen dir (i-1) n m (moveEast x y) --horizontal
+                            | otherwise = (x, y) : createBabyPPen dir (i-1) n m (moveSouth x y)
 
 showTupleRobot :: Int -> (Coord, [Coord], [Coord], [Coord], [Coord], [Coord], [Coord]) -> [Coord]
-showTupleRobot i (c1,c2,c3,c4, c5, c6, c7) | i == 1 = [c1]
-                                            | i == 2 = c2
-                                            | i == 3 = c3
-                                            | i == 4 = c4
-                                            | i == 5 = c5
-                                            | i == 6 = c6
-                                            | i == 7 = c7
+showTupleRobot i (c1,c2,c3,c4, c5, c6, c7) 
+                    | i == 1 = [c1]
+                    | i == 2 = c2
+                    | i == 3 = c3
+                    | i == 4 = c4
+                    | i == 5 = c5
+                    | i == 6 = c6
+                    | i == 7 = c7
+
+getRandomElementList :: Int -> Int -> [Coord] -> [Coord]
+getRandomElementList current n list 
+            | current == n = []
+            | otherwise = let x = list!!(getRandom 0 ((length list)-current-1))
+                            in x : getRandomElementList (current + 1) n (listWithoutElem x list)

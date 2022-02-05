@@ -20,3 +20,6 @@ r2 = 3==2
 ress :: Int -> (Int, Int,Int)
 ress x = ((x+1),
             x, (if x > 0 then 1 else -1))
+
+a::Num a => a
+a = 3
