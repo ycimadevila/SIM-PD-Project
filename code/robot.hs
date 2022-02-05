@@ -72,25 +72,25 @@ moveRobot ch childs dirt objects babypen babypenused robots robchi n m = if (ch 
                                                                     )
 
 ----- testing ----- 
-childs::[Coord]
-childs = [(1, 2), (2, 1)] 
-dirt::[Coord]
-dirt = [(3, 1), (2, 2)] 
-objects::[Coord]
-objects = [(1, 3), (3, 1)] 
-babypen::[Coord]
-babypen = [(0, 0), (0, 1)]
-babypenused::[Coord]
-babypenused = [] 
-robots::[Coord]
-robots = [(2, 2)] 
-ch::Coord 
-ch = (2, 2)
-robchi::[Coord]
-robchi = [] 
-n::Int
-n = 4
-m::Int 
-m = 4   
+-- childs::[Coord]
+-- childs = [(1, 2), (2, 1)] 
+-- dirt::[Coord]
+-- dirt = [(3, 1), (2, 2)] 
+-- objects::[Coord]
+-- objects = [(1, 3), (3, 1)] 
+-- babypen::[Coord]
+-- babypen = [(0, 0), (0, 1)]
+-- babypenused::[Coord]
+-- babypenused = [] 
+-- robots::[Coord]
+-- robots = [(2, 2)] 
+-- ch::Coord 
+-- ch = (2, 2)
+-- robchi::[Coord]
+-- robchi = [] 
+-- n::Int
+-- n = 4
+-- m::Int 
+-- m = 4   
 
-result = moveRobot ch childs dirt objects babypen babypenused robots robchi n m
+-- result = moveRobot ch childs dirt objects babypen babypenused robots robchi n m

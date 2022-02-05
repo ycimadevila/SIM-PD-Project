@@ -17,23 +17,7 @@ sumPos (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
 
 
 -- calculates the percentage of a number x with respect to a total y
--- percent_ :: Int -> Int -> Int 
--- percent_ perc total = a
---     where
---         b = ci $ fi perc * total
---         a = ci $ fi a / 100
---         fi = fromIntegral
---         ci = ceiling
--- -- percent_ perc total = round ((perc * total) `div` 100)
-
-
--- time :: Int -> (Int, Int, Int)
--- time x = (a,b,c)
---   where a = ci $ fi x / fi 3600
---         b = ci $ fi (x `mod` 3600) / fi 60
---         c = (x `mod` 3600) `mod` 60
---         fi = fromIntegral
---         ci = ceiling
+percent_ perc total = round ((perc * total) `div` 100)
 
 -- returns if a position does not go off the board
 inRange (x, y) totalx totaly = x >= 0 && y >=0 && x < totalx && y < totaly
@@ -198,6 +182,7 @@ showTupleRobot i (c1,c2,c3,c4, c5, c6, c7)
                     | i == 5 = c5
                     | i == 6 = c6
                     | i == 7 = c7
+                    
 
 getRandomElementList :: Int -> Int -> [Coord] -> [Coord]
 getRandomElementList current n list 

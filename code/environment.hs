@@ -54,31 +54,45 @@ init = do
 
 -- n, m, all positions, robot, robchi, objects, childs, dirt, babypen, babypenused
 
-generateEnv list n m = let playpen = createBabyPPen (getRandom 1 2) (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
-                            in (
-                                let child = (getRandomElementList 0 (length playpen) (notInList list playpen))
-                                in (
-                                    let objs = getRandomElementList 0 (round((25 *((length list) - 2 * (length child)))   )) (notInList list playpen++child)
-                                    in (
-                                        let dirt_ = getRandomElementList 0 (round((25*((length list) - 2 * (length child)))    )) (notInList list playpen++child++objs)
-                                        in (
-                                            let robot = getRandomElementList 0 1 (notInList list playpen++child++objects++dirt_)
-                                            in (
-                                                Env {
-                                                    t = 0, 
-                                                    height = n,
-                                                    width = m, 
-                                                    robots = robot,
-                                                    childs = child,
-                                                    robotsWithChild = [],
-                                                    object = objs,
-                                                    dirt = dirt_,
-                                                    babypen = playpen,
-                                                    babypenused = []
-                                                }
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-    
+generateNewEnv list n m nxm = 
+    let playpen = createBabyPPen (getRandom 1 2) (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
+    in (
+        let child = (getRandomElementList 0 (length playpen) (notInList list playpen))
+        in (
+            let objs = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
+            in (
+                let dirt_ = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
+                in (
+                    let robot = getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
+                    in (
+                        -- Env {
+                        --     t = 0, 
+                        --     height = n,
+                        --     width = m, 
+                        --     robots = robot,
+                        --     childs = child,
+                        --     robotsWithChild = [],
+                        --     object = objs,
+                        --     dirt = dirt_,
+                        --     babypen = playpen,
+                        --     babypenused = []
+                        -- }
+                        (robot, child,objs)
+                    )
+                )
+            )
+        )
+    )
+
+
+
+-- printEnv i env  | i == 0 = env.t
+--                 | i == 1 = env.height
+--                 | i == 2 = env.width
+--                 | i == 3 = env.robots
+--                 | i == 4 = env.childs
+--                 | i == 5 = env.robotsWithChild
+--                 | i == 6 = env.object
+--                 | i == 7 = env.dirt
+--                 | i == 8 = env.babypen
+--                 | i == 9 = env.babypenused
