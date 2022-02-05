@@ -4,9 +4,6 @@ import Auxiliar as Ax
 import Child
 import Robot
 
--- n = getRandom 3 20
--- m = getRandom 3 20
-
 data Env s = Env {
     t :: Int, 
     height :: Int,
@@ -20,7 +17,7 @@ data Env s = Env {
     babypenused :: [Coord]
 }
 
-init = do 
+start = do 
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
     putStrLn "_-_-_   ROBOT DE LIMPIEZA   _-_-_"
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -52,38 +49,46 @@ init = do
     putStrLn "vacio:            \"_._\""
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_"
 
+
 -- n, m, all positions, robot, robchi, objects, childs, dirt, babypen, babypenused
 
-generateNewEnv list n m nxm = 
-    let playpen = createBabyPPen (getRandom 1 2) (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
-    in (
-        let child = (getRandomElementList 0 (length playpen) (notInList list playpen))
-        in (
-            let objs = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
-            in (
-                let dirt_ = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
-                in (
-                    let robot = getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
-                    in (
-                        -- Env {
-                        --     t = 0, 
-                        --     height = n,
-                        --     width = m, 
-                        --     robots = robot,
-                        --     childs = child,
-                        --     robotsWithChild = [],
-                        --     object = objs,
-                        --     dirt = dirt_,
-                        --     babypen = playpen,
-                        --     babypenused = []
-                        -- }
-                        (robot, child,objs)
-                    )
-                )
-            )
-        )
-    )
+-- generateNewEnv list n m nxm = 
+--     let playpen = createBabyPPen (getRandom 1 2) (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
+--     in (
+--         let child = (getRandomElementList 0 (length playpen) (notInList list playpen))
+--         in (
+--             let objs = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
+--             in (
+--                 let dirt_ = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
+--                 in (
+--                     let robot = getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
+--                     in (
+--                         -- Env {
+--                         --     t = 0, 
+--                         --     height = n,
+--                         --     width = m, 
+--                         --     robots = robot,
+--                         --     childs = child,
+--                         --     robotsWithChild = [],
+--                         --     object = objs,
+--                         --     dirt = dirt_,
+--                         --     babypen = playpen,
+--                         --     babypenused = []
+--                         -- }
+--                         (0, n, m, robot, child, [], objs, dirt_, playpen, [])
+--                     )
+--                 )
+--             )
+--         )
+--     )
 
+generateNewEnv_ list n m nxm rd = do
+    playpen <- createBabyPPen rd (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
+    child <- getRandomElementList 0 (length playpen) (notInList list playpen)
+    objs <- getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
+    dirt_ <- getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
+    robot <- getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
+    (robot, child)
 
 
 -- printEnv i env  | i == 0 = env.t
