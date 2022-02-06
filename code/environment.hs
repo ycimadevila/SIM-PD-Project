@@ -1,10 +1,15 @@
 module Environment where
 
-import Auxiliar as Ax
+import Auxiliar 
 import Child
 import Robot
+import Text.Printf
 
-data Env s = Env {
+-------------------------------------
+-----------  Data Section -----------
+-------------------------------------
+
+data Env = Env {
     t :: Int, 
     height :: Int,
     width :: Int, 
@@ -16,6 +21,37 @@ data Env s = Env {
     babypen :: [Coord],
     babypenused :: [Coord]
 }
+
+--------------------------------------
+-----------  Print Section -----------
+--------------------------------------
+
+instance Show (Env) where {
+    show env = let Env {
+                        t = t_ , 
+                        height = height_ ,
+                        width = width_ , 
+                        robots = robots_ ,
+                        childs = childs_ ,
+                        robotsWithChild = robotsWithChild_ ,
+                        object = object_ ,
+                        dirt = dirt_ ,
+                        babypen = babypen_ ,
+                        babypenused = babypenused_ 
+                    } = env
+        in printf "\nDimensión del tablero: (%d, %d)\n\nTurn: %d\n%s" height_ width_ t_ (printBoard robots_ dirt_ childs_ object_ babypen_ babypenused_ robotsWithChild_ height_ width_)        --in printf "Turn: %d\n(%d, %d)\n%s\nRobots:%s\nNiños:%s\nSuciedad:%s\nObjetos:%s\nCorral:%s\nCorralUsado:%s\n" t_ height_ width_ (printBoard robots_ dirt_ childs_ object_ babypen_ babypenused_ robotsWithChild_ height_ width_) (coordListToStr(robots_)) (coordListToStr(childs_)) (coordListToStr(dirt_)) (coordListToStr(object_)) (coordListToStr(babypen_)) (coordListToStr(babypenused_))
+    }  
+
+envToString (Env t_ height_ width_ robots_ childs_ robotsWithChild_ object_ dirt_ babypen_ babypenused_) = 
+    "\nTurn: "++(show t_)++"\n"++(printBoard robots_ dirt_ childs_ object_ babypen_ babypenused_ robotsWithChild_ height_ width_)
+        -- ++"\nRobot:   "++(coordListToStr robots_)++"\nNino:   "++(coordListToStr childs_)++"\nRobotNino:   "++(coordListToStr robotsWithChild_)
+        --     ++"\nObjetos:   "++(coordListToStr object_)++"\nSuciedad:   "++(coordListToStr dirt_)++"\nCorral:   "++(coordListToStr babypen_)
+        --         ++"\nCorralNino:   "++(coordListToStr babypenused_)
+
+
+coordListToStr [] = ""
+coordListToStr ((a,b):xs) = "(" ++ show a ++", "++ show b++ ") " ++ coordListToStr xs
+
 
 start = do 
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -39,7 +75,7 @@ start = do
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_"
     putStrLn "_-_-_   LEYENDA   _-_-_"
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_"
-    putStrLn "niño:             \"_C_\""
+    putStrLn "niño:             \"_c_\""
     putStrLn "robot             \"_r_\""
     putStrLn "robot con niño:   \"_R_\""
     putStrLn "basura:           \"_d_\""
@@ -49,55 +85,97 @@ start = do
     putStrLn "vacio:            \"_._\""
     putStrLn "_-_-_-_-_-_-_-_-_-_-_-_"
 
+--------------------------------------------
+-----------  Environment Section -----------
+--------------------------------------------
 
--- n, m, all positions, robot, robchi, objects, childs, dirt, babypen, babypenused
+baseEnv n m =  Env {
+            t = 0,
+            height = n,
+            width = m,
+            robots = [],
+            childs = [],
+            robotsWithChild = [],
+            object = [],
+            dirt = [],
+            babypen = [],
+            babypenused = []
+            }
 
--- generateNewEnv list n m nxm = 
---     let playpen = createBabyPPen (getRandom 1 2) (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
---     in (
---         let child = (getRandomElementList 0 (length playpen) (notInList list playpen))
---         in (
---             let objs = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
---             in (
---                 let dirt_ = getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
---                 in (
---                     let robot = getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
---                     in (
---                         -- Env {
---                         --     t = 0, 
---                         --     height = n,
---                         --     width = m, 
---                         --     robots = robot,
---                         --     childs = child,
---                         --     robotsWithChild = [],
---                         --     object = objs,
---                         --     dirt = dirt_,
---                         --     babypen = playpen,
---                         --     babypenused = []
---                         -- }
---                         (0, n, m, robot, child, [], objs, dirt_, playpen, [])
---                     )
---                 )
---             )
---         )
---     )
+egEnv =  Env {
+            t = 0,
+            height = 3,
+            width = 3,
+            robots = [(0,0)],
+            childs = [(2,0)],
+            robotsWithChild = [],
+            object = [(1,1)],
+            dirt = [],
+            babypen = [(2,2)],
+            babypenused = []
+            }
 
-generateNewEnv_ list n m nxm rd = do
-    playpen <- createBabyPPen rd (getRandom 1 (min n m)) n m ((getRandomElementList 0 1 list)!!0)
-    child <- getRandomElementList 0 (length playpen) (notInList list playpen)
-    objs <- getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child)
-    dirt_ <- getRandomElementList 0 (getRandom 0 (round(nxm/6))) (notInList list playpen++child++objs)
-    robot <- getRandomElementList 0 1 (notInList list playpen++child++objs++dirt_)
-    (robot, child)
+_generateNewEnvCon_ :: Env -> [[Coord]]
+_generateNewEnvCon_ (Env t_ height_ width_ robots_ childs_ robotsWithChild_ object_ dirt_ babypen_ babypenused_) = do
+    let rest_ = getRandomElementList (height_*width_) (getBoxes 0 0 height_ width_)
+    let ppen = createBabyPPen (getRandom 1 2) (getRandom 1 ((min height_ width_)-1)) height_ width_ ((getRandomElementList 1 rest_)!!0)
+    let rest = notInList rest_ ppen
+    let ch = take (length ppen) rest
+    let obj = take (getRandom 0 (percent_ 20 (height_*width_))) (drop ((length ch)*2) rest) 
+    let dir = take (getRandom 0 (percent_ 20 (height_*width_))) (drop (((length ch)*2)+ (length obj)) rest)
+    let rob = take 1 (drop (((length ch)*2) + (length obj) + (length dir)) rest)
+    [ppen, ch, obj, dir, rob]
 
+_generateNewEnv_ :: Env -> [[Coord]] -> Env
+_generateNewEnv_ env list = 
+        let Env { t = t_, height = height_, width = width_, robots = robots_, 
+                    childs = childs_, robotsWithChild = robotsWithChild_, object = object_, 
+                        dirt = dirt_, babypen = babypen_, babypenused = babypenused_
+            } = env
+            in 
+                Env {
+                    t = t_,
+                    height = height_,
+                    width = width_,
+                    robots = list!!4,
+                    childs = list!!1,
+                    robotsWithChild = robotsWithChild_,
+                    object = list!!2,
+                    dirt = list!!3,
+                    babypen = list!!0,
+                    babypenused = babypenused_
+                } 
 
--- printEnv i env  | i == 0 = env.t
---                 | i == 1 = env.height
---                 | i == 2 = env.width
---                 | i == 3 = env.robots
---                 | i == 4 = env.childs
---                 | i == 5 = env.robotsWithChild
---                 | i == 6 = env.object
---                 | i == 7 = env.dirt
---                 | i == 8 = env.babypen
---                 | i == 9 = env.babypenused
+generateNewEnv n m = _generateNewEnv_ (baseEnv n m) (_generateNewEnvCon_ (baseEnv n m))
+
+endCurrentSim (Env t_ height_ width_ robots_ childs_ robotsWithChild_ object_ dirt_ babypen_ babypenused_) turn = 
+    t_ == turn 
+
+moveAgentsConect (Env t_ height_ width_ robots_ childs_ robotsWithChild_ object_ dirt_ babypen_ babypenused_) = do
+    let (_ , newRobot, newRobotChild, newChild, newDirt, newbabypen, newbabyPenUsed) = moveRobot (robots_!!0) childs_ dirt_ object_ babypen_ babypenused_ robots_ robotsWithChild_ height_ width_
+    let (_ , newObj_, newChild_, newDirt_) = moveListChild newChild newChild newDirt newRobot object_ newbabypen height_ width_
+    [newRobot, newChild_, newRobotChild, newObj_, newDirt_, newbabypen, newbabyPenUsed]
+    
+
+_moveAgents_ (Env t_ height_ width_ robots_ childs_ robotsWithChild_ object_ dirt_ babypen_ babypenused_) list = 
+    Env {
+        t = t_ + 1,
+        height = height_,
+        width = width_,
+        robots = list!!0,
+        childs = list!!1,
+        robotsWithChild = list!!2,
+        object = list!!3,
+        dirt = list!!4,
+        babypen = list!!5,
+        babypenused = list!!6
+    }
+
+moveAgents env = _moveAgents_ env (moveAgentsConect env)
+
+moveListChild [] childs_ dirt_ robots_ object_ babypen_ height_ width_ = (0, object_, childs_, dirt_)
+moveListChild (ch : chr) childs_ dirt_ robots_ object_ babypen_ height_ width_ = 
+    let (_, obj, child, dirt) = moveChild ch childs_ dirt_ robots_ object_ babypen_ height_ width_
+    in moveListChild chr child dirt robots_ obj babypen_ height_ width_
+
+  

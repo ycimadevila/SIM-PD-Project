@@ -3,16 +3,6 @@ module Child where
 import Auxiliar as Ax
 
 
--- search for the child that corresponds to the coordinate
--- searchChildByCoord :: Coord -> [Coord] -> Coord
--- searchChildByCoord _ [] = (-1, -1)
--- searchChildByCoord ch (child: xr) | ch == child = child
---                                   | otherwise = searchChildByCoord ch xr
-
--- search for the direction of the child that corresponds to the coordinate
--- getChildDir :: Coord -> [Child] -> Int
--- getChildDir coord childs = snd (searchChildByCoord coord childs)
-
 -- object coordinate direction 
   -- my coordinate -> direction -> [coordinates used] -> coordinate I'm gonna move
 consecutiveIsObj :: Coord -> Int -> [Coord]  -> Bool
@@ -60,58 +50,42 @@ moveByRandom :: (Coord, [Coord], [Coord], [Coord]) -> (Coord, [Coord], [Coord], 
 moveByRandom x y | (getRandom 1 2) == 1 = y
                  | otherwise = x
 
---grid = 
-poopByRandom :: Coord -> [Coord] -> Coord
-poopByRandom ch grid = if (getRandom 1 100) < 20 && (length grid > 0)
-                        then grid!!(getRandom 1 ((length grid)-1))
-                        else (-1, -1)
-
--- current coord, direction, childs list, dirt list, n, m -> (next coord , newObj, newChild, newDirt)
-__moveChild__ :: Coord -> Int -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> [Coord] -> (Coord, [Coord], [Coord], [Coord])
-__moveChild__ ch i childs dirt robots objects babypen n m grid = if (isNotDirty ch i dirt) && (isNotBabypen ch i babypen) && (isNotRobot ch i robots) && (inRange (moveDirection ch i) n m)  -- if is not filled
-                                                then (if isObject ch i objects 
-                                                        -- if is an object
-                                                        then(if (getRandom 1 100) < 20 && (length grid > 0) -- poop
-                                                                then (
-                                                                        moveDirection ch i,
-                                                                        snd (moveObject ch objects childs dirt robots i n m), 
-                                                                        concatList (moveDirection ch i) (listWithoutElem ch childs),
-                                                                        (grid!!(getRandom 1 ((length grid)-1))):dirt
-                                                                        )
-                                                                else (
-                                                                        moveDirection ch i,
-                                                                        snd (moveObject ch objects childs dirt robots i n m), 
-                                                                        concatList (moveDirection ch i) (listWithoutElem ch childs),
-                                                                        dirt
-                                                                        )
-                                                                ) 
-                                                        -- if is not an object
-                                                        else (if (getRandom 1 100) < 20 && (length grid > 0) -- poop
-                                                                then (
-                                                                        moveDirection ch i, 
-                                                                        objects, 
-                                                                        concatList (moveDirection ch i) (listWithoutElem ch childs), 
-                                                                        ((grid)!!(getRandom 1 ((length grid)-1))):dirt
-                                                                        )
-                                                                else (
-                                                                        moveDirection ch i, 
-                                                                        objects, 
-                                                                        concatList (moveDirection ch i) (listWithoutElem ch childs), 
-                                                                        dirt
-                                                                        )
-                                                                )
-                                                    )
-                                                -- if is not empty
-                                                else (if (getRandom 1 100) < 80 && (length grid > 0) -- poop
-                                                        then (ch, objects, childs, 
-                                                                ((grid)!!(getRandom 1 ((length grid)-1))): dirt
-                                                                                )
-                                                        else (ch, objects, childs, dirt)
-                                                        )
 
 moveChild :: Coord -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> (Coord, [Coord], [Coord], [Coord])
 moveChild ch childs dirt robots objects babypen n m = __moveChild__ ch (getRandom 0 3) childs dirt robots objects babypen n m (validPos (notInList (notInList (notInList (notInList (getGrid ch) dirt) robots) objects) babypen) n m) 
 
-
+-- (next coord , newObj, newChild, newDirt)
+__moveChild__ :: Coord -> Int -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> [Coord] -> Int -> Int -> [Coord] -> (Coord, [Coord], [Coord], [Coord])
+__moveChild__ ch i childs dirt robots objects babypen n m grid = 
+        let next = moveDirection ch i
+        in ( if inRange next n m && (notElem next childs) && (notElem next dirt) && (notElem next robots) && (notElem next babypen) 
+			then ( -- can move
+				if (elem next objects)
+					then (--obj
+						let (mov, obj) = moveObject ch objects childs dirt robots i n m
+						in (mov, obj, mov:(listWithoutElem ch childs), dirt)
+					)
+					else ( -- empty
+						next, 
+						objects, 
+						(next:(listWithoutElem ch childs)), 
+						(
+							if (getRandom 1 100) < 40 && (length (notInList (ch:(grid)) [next]) > 0)
+								then (getRandomElementList 1 (notInList (ch:(grid)) [next]))++dirt
+								else dirt
+						)
+					)
+			)
+			else ( -- cant move
+				ch, 
+				objects, 
+				childs, 
+				(
+					if (getRandom 1 100) < 20 && (length (notInList (ch:(grid)) [next]) > 0)
+						then (getRandomElementList 1 grid)++dirt
+						else dirt
+				)
+			)
+		)
 
 

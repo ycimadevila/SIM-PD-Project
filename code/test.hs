@@ -23,3 +23,6 @@ ress x = ((x+1),
 
 a::Num a => a
 a = 3
+
+name_ t@(a, b, c) = t
+    
